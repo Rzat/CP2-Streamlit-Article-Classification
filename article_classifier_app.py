@@ -8,8 +8,14 @@ Created on Tue Nov 26 20:22:45 2024
 import streamlit as st
 import joblib
 import re
+import nltk
 from nltk.corpus import stopwords
 import pandas as pd
+
+try:
+    stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
 
 st.set_page_config(layout="wide", page_title="Article Classification App")
 st.sidebar.title("About This App")
