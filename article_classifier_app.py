@@ -17,15 +17,34 @@ try:
 except LookupError:
     nltk.download('stopwords')
 
+about = """ 
+Welcome to the Article Classification App, a powerful yet simple tool that classifies articles into predefined categories using machine learning.
+**Key Features:**
+* Article Classification: Paste any text, and the app predicts the category with confidence.
+* Class Probabilities: View a breakdown of probabilities for all possible categories.
+* Confidence Score: See how confident the model is about its prediction.
+
+**Behind the Scenes:**
+* The app uses a Naive Bayes classifier trained on a TF-IDF vectorized dataset.
+* It leverages the NLTK library for text preprocessing, including removing stop words and tokenization.
+
+**How to Use:**
+* Enter your article or text in the input box.
+* Click on Classify to see the predicted category and probabilities.
+* Explore class probabilities visually in a bar chart.
+
+**This app is ideal for quick text categorization tasks and can be used for news classification, content tagging, or educational purposes.**
+"""
 st.set_page_config(layout="wide", page_title="Article Classification App")
 st.sidebar.title("About This App")
-st.sidebar.write("This app classifies articles into categories using a trained model.")
+st.sidebar.write(about)
 
 
 
 tfidf = joblib.load('tfidf_vectorizer.pkl')
 nb_model = joblib.load('nb_model.pkl')
 label_encoder = joblib.load('label_encoder.pkl')
+
 
 def predicted_label(article,model):
     processed_text = re.sub('[^a-zA-Z]', ' ', article).lower()
@@ -41,14 +60,10 @@ def predicted_label(article,model):
 
 def main():
     st.title("Article Classification App")
-    st.write("Welcome to article classification app. Enter an article below to classify it")
-
-    col1, col2 = st.columns([2,2])
+    #st.write("Welcome to article classification app. Enter an article below to classify it")
     
-   
-    with col1:
-   
-     article_input= st.text_area("Input article text", height=200)
+    input_text_placeholder = "Please enter some text to classify"
+    article_input= st.text_area("Input article text", height=200,placeholder=(input_text_placeholder) ,label_visibility="visible")
  
     if st.button("Classify"):
             
@@ -56,26 +71,16 @@ def main():
             st.write("Processing your Article...") 
             numeric_label, confidence, probabilities = predicted_label(article_input, nb_model)
             readable_label = label_encoder.inverse_transform([numeric_label])[0]
-            st.success(f"The predicted category is: **{readable_label}** with **{confidence * 100:.2f}%** Confidence")
+            st.success(f"The predicted category by NB is: **{readable_label}** with **{confidence * 100:.2f}%** Confidence")
         
-            with col2:
-                st.write("Class Probabilities: ")
-                class_labels = label_encoder.classes_
-                st.bar_chart(pd.DataFrame(probabilities, index=class_labels, columns=["Probability"]))
-                st.write(f"Confidence: {confidence:.2%}")
-                st.progress(confidence)
-                # result_df = pd.DataFrame({
-                #     "Class": label_encoder.classes_,
-                #     "Probability": probabilities[0]
-                #     })
-                # csv = result_df.to_csv(index=False)
-                # st.download_button("Download Report as CSV", data=csv, file_name="classification_report.csv", mime="text/csv")
-                
-                
-    else:
-            st.warning("Please enter some text to classify")
 
+            st.write("Class Probabilities: ")
+            class_labels = label_encoder.classes_
+            st.bar_chart(pd.DataFrame(probabilities, index=class_labels, columns=["Probability"]))
+            st.write(f"Confidence: {confidence:.2%}")
+            st.progress(confidence)
             
+        
     
 
 
